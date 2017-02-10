@@ -1,0 +1,110 @@
+4.4	解压
+解压Redis的tar包：
+ tar -zxvf redis-3.0.2.tar.gz  or tar -zxvf redis-3.0.7.tar.gz
+这样就在当前目录下新建了一个包含发行版源代码的目录
+4.5	安装
+进入redis解压目录：
+cd <REDIS_FILE>
+执行如下命令指定目录安装Redis：
+make PREFIX=<REDIS_HOME> install
+
+4.6	创建工作目录并配置
+进入Redis安装目录：
+cd <REDIS_HOME>
+为了简洁明了，此处工作目录以端口号命名：
+mkdir 6379 6380
+分别在6379、6380目录下创建data、log、run、conf文件夹，例如在6379目录下创建：
+cd 6379
+mkdir data log run conf
+复制配置文件redis.conf到6379、6380目录下的conf目录中
+cp <REDIS_FILE>/redis.conf <REDIS_HOME>/6379/conf/redis.conf
+cp <REDIS_FILE>/redis.conf <REDIS_HOME>/6380/conf/redis.conf
+分别修改6379、6380 conf目录下的redis.conf文件，此处以6379为例：
+pidfile <REDIS_HOME>/ 6379/run/redis.pid
+port 6379
+logfile <REDIS_HOME>/6379/log/stdout.log
+dir <REDIS_HOME>/ 6379/data
+daemonize yes
+cluster-enabled yes
+cluster-config-file nodes.conf
+cluster-node-timeout 5000
+#appendonly yes
+查看配置文件：grep -v '^#\|^$' redis.conf
+
+修注：1.pidfile 或logfile目录配置内容可以用双引号括起来。
+      2. 配置文件中有默认的tcp-backlog 511参数，该参数配置不正确不能成功启动。从注释来看该值取/proc/sys/net/core/somaxconn 和tcp_max_syn_backlog二者的最小配置，二者需要root权限才可以查看，我在centos上配置为tcp-backlog 100。
+root查看方法:
+cat /proc/sys/net/ipv4/tcp_max_syn_backlog
+cat /proc/sys/net/core/somaxconn
+
+4.7	启动、停止Redis
+4.7.1	启动Redis服务器
+进入<REDIS_HOME>的bin目录下,命令：
+cd <REDIS_HOME>/bin
+./redis-server <REDIS_HOME>/6379/conf/redis.conf
+./redis-server <REDIS_HOME>/6380/conf/redis.conf
+
+注：此命令仅有一个启动参数，用以指定配置文件，不加参数执行默认配置。
+4.7.2	停止Redis
+可指定端口，关闭服务：
+./redis-cli -p 6379 shutdown
+./redis-cli -p 6380 shutdown
+注：为了下面的操作，如果执行了关闭服务的操作，请重新执行4.7.1重新开启服务
+4.7.3	连接Redis
+单实例链接方式：
+redis-cli  -h主机IP  -p 端口号(默认为127.0.0.1 6379)
+
+集群连接需要增加 –c 参数，主机和端口号随便连接一个主节点即可，当操作没有命中链接的主节点时集群内部路由到hash命中节点。这一步路由在网络条件不好时测试性能影响较大。
+redis-cli –c  -h主机IP  -p 端口号(默认为127.0.0.1 6379)
+注：至此，redis便安装完毕了，请在另外两台linux服务器下同样的执行4.4，4.5，4.6，4.7的操作。
+
+5	Ruby安装步骤
+redis集群的创建需要ruby环境
+5.1	下载
+Ruby到官方网站：https://www.ruby-lang.org/en/downloads下载
+本文挡用http://cache.ruby-lang.org/pub/ruby/2.2/ruby-2.2.2.tar.gz
+5.2	解压
+解压Ruby的tar包：
+tar –zxvf ruby-2.2.2.tar.gz
+5.3	安装
+进入Ruby解压目录
+cd <RUBY_FILE>
+执行一下命令进行安装
+./configure prefix=<RUBY_HOME>
+make 
+make install
+加入环境变量
+export PATH=<RUBY_HOME>/bin:$PATH
+
+至此，Ruby便安装好了。
+6	Redis集群的创建
+6.1	安装redis接口
+创建redis集群需要ruby环境，而ruby需要redis接口，因此，先安装redis接口。
+因国内网络环境无法连接到ruby资源库，淘宝给出了解决方案，我们只需要替换资源地址便可，详情可查看http://ruby.taobao.org
+
+移除ruby官方的资源库地址：
+gem sources --remove https://rubygems.org/
+
+加入淘宝的资源地址：
+gem sources -a https://ruby.taobao.org/
+
+查看此时是否只有ruby.taobao.org：
+gem sources –l
+
+安装redis接口：
+gem install redis
+
+一般来说，安装Redis的服务器链接外网都比较困难，通过以上的网络方式安装局限性较大，建议下载到本地安装。通过命令-l (local)方式安装。
+gem install redis-3.2.1.gem -l
+
+6.2	创建集群
+进入redis解压目录的src下：
+cd <RDIS_FILE>/src
+执行命令创建集群(此处1表示1个主master对应一个从slave)
+./redis-trib.rb create --replicas 1 <IP01>:6379 <IP02>:6379 <IP03>7:6379 <IP01>:6380 <IP02>:6380 <IP03>:6380
+ 
+如上图，此时输入yes并enter。
+
+ 
+redis集群创建成功。
+注意：这里的redis主从是自动分配的
