@@ -1,0 +1,109 @@
+##docker安装
+
+###准备工作
+
+* 检查linux内核版本,需要安装3.8及以上内核版本（学习环境是CentOS7）
+
+		[root@localhost ~]# uname -a
+		Linux localhost.localdomain 3.10.0-229.el7.x86_64 #1 SMP Fri Mar 6 11:36:42 UTC 2015 x86_64 x86_64 x86_64 GNU/Linux
+
+###安装
+
+* 建议使用yum安装，更易于管理，也可自动解决docker的依赖。
+
+		yum update
+
+* 添加yum源
+
+		[root@localhost ~]# tee /etc/yum.repos.d/docker.repo <<-'EOF'
+		>[dockerrepo]
+		>name=Docker Repository
+		>baseurl=https://yum.dockerproject.org/repo/main/centos/7/
+		>enabled=1
+		>gpgcheck=1
+		>gpgkey=https://yum.dockerproject.org/gpg
+		>EOF
+		[dockerrepo]
+		name=Docker Repository
+		baseurl=https://yum.dockerproject.org/repo/main/centos/7/
+		enabled=1
+		gpgcheck=1
+		gpgkey=https://yum.dockerproject.org/gpg
+
+* 安装docker包
+
+		yum install docker-engine
+
+* 启动docker守护进程
+
+		[root@localhost ~]# systemctl start docker
+
+* 确保开机启动docker
+
+		[root@localhost ~]# systemctl enable docker.service
+
+* 查看docker是否正确安装
+
+		[root@localhost ~]# docker info
+		Containers: 0
+		 Running: 0
+		 Paused: 0
+		 Stopped: 0
+		Images: 0
+		Server Version: 1.12.5
+		Storage Driver: devicemapper
+		 Pool Name: docker-8:3-36064091-pool
+		 Pool Blocksize: 65.54 kB
+		 Base Device Size: 10.74 GB
+		 Backing Filesystem: xfs
+		 Data file: /dev/loop0
+		 Metadata file: /dev/loop1
+		 Data Space Used: 11.8 MB
+		 Data Space Total: 107.4 GB
+		 Data Space Available: 14.39 GB
+		 Metadata Space Used: 581.6 kB
+		 Metadata Space Total: 2.147 GB
+		 Metadata Space Available: 2.147 GB
+		 Thin Pool Minimum Free Space: 10.74 GB
+		 Udev Sync Supported: true
+		 Deferred Removal Enabled: false
+		 Deferred Deletion Enabled: false
+		 Deferred Deleted Device Count: 0
+		 Data loop file: /var/lib/docker/devicemapper/devicemapper/data
+		 WARNING: Usage of loopback devices is strongly discouraged for production use. Use `--storage-opt dm.thinpooldev` to specify a custom block storage device.
+		 Metadata loop file: /var/lib/docker/devicemapper/devicemapper/metadata
+		 Library Version: 1.02.135-RHEL7 (2016-09-28)
+		Logging Driver: json-file
+		Cgroup Driver: cgroupfs
+		Plugins:
+		 Volume: local
+		 Network: null host bridge overlay
+		Swarm: inactive
+		Runtimes: runc
+		Default Runtime: runc
+		Security Options: seccomp
+		Kernel Version: 3.10.0-229.el7.x86_64
+		Operating System: CentOS Linux 7 (Core)
+		OSType: linux
+		Architecture: x86_64
+		CPUs: 1
+		Total Memory: 979.6 MiB
+		Name: localhost.localdomain
+		ID: PHLY:5JW5:RXCG:ICXL:YKVX:O3JC:S5W7:2O4L:DBPT:TAYG:NIPW:3ZLK
+		Docker Root Dir: /var/lib/docker
+		Debug Mode (client): false
+		Debug Mode (server): false
+		Registry: https://index.docker.io/v1/
+		WARNING: bridge-nf-call-iptables is disabled
+		WARNING: bridge-nf-call-ip6tables is disabled
+		Insecure Registries:
+		 127.0.0.0/8
+		[root@localhost ~]# 
+
+### 备注
+
+也可以从官方网站下载最新的rpm包进行安装。
+
+
+
+
