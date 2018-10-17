@@ -1,0 +1,8 @@
+git init
+git add .
+git commit -am 'init'
+git remote add origin https://github.com/xxx/xxx.git
+-- （如果github上仓库已存在）git pull origin master --allow-unrelated-histories
+git push -u orgin master
+
+git rm -r --cached target              # 删除target文件夹
